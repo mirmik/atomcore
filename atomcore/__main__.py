@@ -2,18 +2,36 @@ import atomcore
 import pycrow
 import time
 
-crowaddr = pycrow.compile_address(".12.127.0.0.1:10009") 
+import signal
+
+crowaddr = pycrow.address(".12.127.0.0.1:10009") 
 print(crowaddr)
 
+def eee(a, b):
+	pycrow.stop_spin()
+
+def incoming_packet(pack):
+	print(pack)
+
+def undelivered_packet(pack):
+	print(pack)
+
 def main():
+	signal.signal(signal.SIGINT, eee)
+
 	print("main")
 	pycrow.diagnostic(True)
 	pycrow.create_udpgate(12, 10020)
 	pycrow.start_spin()
-	pycrow.start_alive(addr=crowaddr, netname="testnode", resend_time=1000, dietime=4000, qos=0, ackquant=200)
-	print("atomcore main")
 
-	while(1):
-		time.sleep(1)
+	corenode = pycrow.libcrow.PyNode(incoming_packet, undelivered_packet)
+	corenode.bind(12)
 
-	pycrow.finish_spin()
+	#corenode = pycrow.create_node(
+	#	incoming_handler = incoming_handler,
+	#	undelivered_handler = undelivered_handler
+	#)
+
+	#corenode.bind(1)
+
+	pycrow.join_spin()
