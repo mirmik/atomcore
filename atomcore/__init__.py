@@ -1,1 +1,0 @@
-print("atomcore __init__")
